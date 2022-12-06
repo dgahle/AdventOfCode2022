@@ -26,12 +26,36 @@ def test_inclusion_check() -> None:
     # Check for inclusion
     num: int = inclusion_check(data)
     # Assert
-    assert_msg: str = f"num {num} != 2!"
-    assert num == 2, assert_msg
+    num_expectation: int = 2
+    assert_msg: str = f"num {num} != {num_expectation}!"
+    assert num == num_expectation, assert_msg
+
+
+def test_inclusion_check_part2() -> None:
+    """
+
+    :return None:
+    """
+    # Load test data
+    separator: str = '\n'
+    with open(TEST_INPUT_PATH, 'r') as f:
+        data: str = f.read()
+    # Format into pairs
+    data: list[str] = data.split(separator)
+    d: list[str]
+    separator: str = ','
+    data: list[list[str]] = [d.split(separator) for d in data]
+    # Check for inclusion
+    num: int = inclusion_check(data, total=False)
+    num_expectation: int = 4
+    # Assert
+    assert_msg: str = f"num {num} != {num_expectation}!"
+    assert num == num_expectation, assert_msg
 
 
 def main() -> None:
     test_inclusion_check()
+    test_inclusion_check_part2()
     pass
 
 

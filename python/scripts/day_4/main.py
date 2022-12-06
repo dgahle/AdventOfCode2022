@@ -34,6 +34,12 @@ def part_1() -> None:
     # Print answer
     msg: str = f"Part 1) {number_of_duplications} assignment pairs does one range fully contain the other."
     print(msg, end='\n\n')
+    # Inclusion check
+    number_of_duplications: int = inclusion_check(data, total=False)
+    # Print answer
+    msg: str = f"Part 2) {number_of_duplications} assignment pairs do the ranges overlap."
+    print(msg)
+
     pass
 
 
