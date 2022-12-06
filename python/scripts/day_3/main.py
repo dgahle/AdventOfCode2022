@@ -1,6 +1,6 @@
 # Imports
 from pathlib import Path
-from python.scripts.day_3.functions import get_priorities
+from python.scripts.day_3.functions import get_group_priorities, get_priorities
 
 
 # Variables
@@ -44,8 +44,8 @@ def part_2() -> None:
     with open(INPUT_PATH, 'r') as f:
         data: list[str] = f.read().split(separator)
     # Calculate priorities
-    ...
-    priorities_sum: int
+    priorities: list = get_group_priorities(data)
+    priorities_sum: int = sum(priorities)
     # Print message
     msg: str = f"Part 2) The sum of the priorities of those item types is {priorities_sum}"
     print(msg)

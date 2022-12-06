@@ -49,6 +49,31 @@ def get_priorities(data: list[str]) -> list[int]:
     return priorities
 
 
+def get_group_priorities(data: list[str]) -> list[int]:
+    """
+
+
+    :param (list[str]) data:
+    :return (list[int]) priorities:
+    """
+    priorities: list[int] = []
+    group_size: int = 3
+    number_of_groups: int = len(data) // group_size
+    i_group: int
+    for i_group in range(number_of_groups):
+        lhs_index: int = i_group * group_size
+        rhs_index: int = lhs_index + group_size
+        group_index: slice = slice(lhs_index, rhs_index)
+        group_data: list[str] = data[group_index]
+        d: str
+        group_data: list[set] = [set(d) for d in group_data]
+        priority_letter: set = group_data[0].intersection(*group_data[1:])
+        priority_letter: str = list(priority_letter)[0]
+        priority_number: int = priority_letter_to_number(priority_letter)
+        priorities.append(priority_number)
+
+    return priorities
+
 def main() -> None:
     pass
 
