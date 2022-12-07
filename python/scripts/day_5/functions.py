@@ -1,8 +1,11 @@
 # Imports
+from copy import copy
 from numpy import arange, array, concatenate, ndarray, zeros
 from pathlib import Path
+from pandas import DataFrame
 from re import match
-from typing import Optional
+from tqdm import tqdm
+from typing import Iterable, Optional
 
 
 # Variables
@@ -96,6 +99,9 @@ def take_step(data: ndarray, instruction: str) -> ndarray:
     num_rows, num_cols = data.shape
     # Format string instruction to int
     instruction: ndarray = array(instruction.split(' '))[1 + 2 * arange(3)]
+    num_move: int
+    col_from: int
+    col_to: int
     num_move, col_from, col_to = instruction.astype(int).tolist()
     # Index correction (starts at 1 -> starts at 0)
     index_correction: int = -1
@@ -110,12 +116,17 @@ def take_step(data: ndarray, instruction: str) -> ndarray:
     cells: ndarray = data[cell_from_index].copy()
     data[cell_from_index] = empty_cell
     # Add cell to new place
-    cell_lhs_index: int = max([0, (empty_cell == data[:, col_to]).sum() - 1])
-    cell_rhs_index: int = cell_lhs_index + num_move
+    cell_rhs_index: int = max([0, (empty_cell == data[:, col_to]).sum()])
+    cell_lhs_index: int = cell_rhs_index - num_move
     cell_index: slice = slice(cell_lhs_index, cell_rhs_index)
     cell_to_index: tuple[slice, int] = (cell_index, col_to)
+    cells_to_overwrite: ndarray = data[cell_to_index]
+    overwriting_check: bool = not ('' == cells_to_overwrite).all()
+    if overwriting_check:
+        error_msg: str = f'Trying to overwrite filled cells ({cells_to_overwrite.tolist()})!'
+        raise ValueError(error_msg)
     # Check if data needs to be expanded
-    num_rows_to_add: int = cell_index.stop - num_rows
+    num_rows_to_add: int = num_rows - cell_index.stop
     if num_rows_to_add > 0:
         # Build missing rows
         shape: tuple[int, int] = (num_rows_to_add, num_cols)
@@ -124,17 +135,88 @@ def take_step(data: ndarray, instruction: str) -> ndarray:
         arrays: tuple[ndarray, ndarray] = (extra_rows, data)
         data = concatenate(arrays, axis=0)
         # Update date
-        cell_rhs_index: int = max([0, (empty_cell == data[:, col_to]).sum()])
+        cell_rhs_index: int = (empty_cell == data[:, col_to]).sum()
+        cell_rhs_index: int = max([0, cell_rhs_index])
         cell_lhs_index: int = cell_rhs_index - num_move
         cell_index: slice = slice(cell_lhs_index, cell_rhs_index)
         cell_to_index: tuple[slice, int] = (cell_index, col_to)
-        data[cell_to_index] = cells[::-1]
-    else:
-        data[cell_to_index] = cells
+
+    cells = cells[::-1] if num_move > 1 else cells
+    data[cell_to_index] = cells
     # Check for empty rows
     zero_row_check: Optional[ndarray, bool] = data.shape[1] == (zeros(data.shape[1], dtype=str) == data).sum(1)
     data = data[~zero_row_check]
     return data
+
+
+def build_puzzle(input_path: Path) -> tuple[ndarray, list[str]]:
+    with open(input_path, 'r') as f:
+        data_raw: str = f.read()
+    # Format
+    puzzle: ndarray
+    instructions: list[str]
+    puzzle, instructions = preprocess_inputs(data_raw)
+    return puzzle, instructions
+
+
+def display_puzzle(puzzle: ndarray) -> DataFrame:
+    # Get columns
+    num_rows: int
+    num_cols: int
+    num_rows, num_cols = puzzle.shape
+    columns: ndarray = 1 + arange(num_cols)
+    index: ndarray = arange(num_rows)
+    kwargs: dict[str] = dict(
+        columns=columns,
+        index=index,
+    )
+    # Build and return
+    puzzle: DataFrame = DataFrame(puzzle, **kwargs)
+    return puzzle
+
+
+class SolvePuzzle:
+
+    def __init__(self, input_path: Path):
+        # Class attribute variables declaration
+        self.solution: str = ''
+        # Cache inputs
+        self.input_path: Path = input_path
+        # Build puzzle
+        self.puzzle: ndarray
+        self.instructions: list[str]
+        self.instructions_used: list[str] = []
+        self.puzzle, self.instructions = build_puzzle(self.input_path)
+        self.instructions_remaining: list[str] = copy(self.instructions)
+
+    def solve(self, callback: bool = False) -> str:
+        # Take all steps/instructions
+        num_steps: int = len(self.instructions)
+        self.take_steps(num=num_steps, callback=callback)
+        # return the solution
+        self.solution = read_the_top(self.puzzle)
+        return self.solution
+
+    def take_steps(self, num: int, callback: bool = False) -> None:
+        step: int
+        instruction: str
+        instructions: list[str] = self.instructions_remaining[:num]
+        if callback:
+            print(display_puzzle(self.puzzle), end='\n\n')
+        iterator: Iterable = enumerate(instructions)
+        iterator = iterator if callback else tqdm(iterator)
+        for step, instruction in iterator:
+            # Take step
+            step += 1
+            if callback:
+                print(f'Step {step}: {instruction}', end='\n\n')
+            self.puzzle: ndarray = take_step(self.puzzle.copy(), instruction=instruction)
+            if callback:
+                print(display_puzzle(self.puzzle), end='\n\n')
+        # Cache instructions followed and remaining
+        self.instructions_used.extend(instructions)
+        self.instructions_remaining = self.instructions_remaining[num:]
+        pass
 
 
 def main() -> None:

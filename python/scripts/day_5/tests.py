@@ -1,7 +1,7 @@
 # Imports
 from numpy import ndarray
 from pathlib import Path
-from python.scripts.day_5.functions import preprocess_inputs, preprocess_puzzle, read_the_top, take_step
+from python.scripts.day_5.functions import preprocess_inputs, preprocess_puzzle, read_the_top, SolvePuzzle, take_step
 
 
 # Variables
@@ -31,115 +31,68 @@ def test_read_the_top() -> None:
 
 
 def test_take_step() -> None:
-    # Load data
-    with open(TEST_INPUT_PATH, 'r') as f:
-        data_raw: str = f.read()
-    # Preprocess inputs
-    data: ndarray
-    instructions: list[str]
-    data, instructions = preprocess_inputs(data_raw)
-    # Take step
-    num_test: int
-    result: ndarray
-    step: int
+    # Load data and solve puzzle
+    puzzle: SolvePuzzle = SolvePuzzle(TEST_INPUT_PATH)
     num_test: int = 1
-    for step in range(num_test):
-        instruction: str = instructions[step]
-        if step == 0:
-            result = take_step(data.copy(), instruction)
-        else:
-            take_step(result, instruction)
-    # Compare against expectation
-    # Load
+    puzzle.take_steps(num_test)
+    result: ndarray = puzzle.puzzle
+    # Load expectation
     test_output_path: Path = INPUT_DIR_PATH / f'test_output_step_{num_test}.txt'
     with open(test_output_path, 'r') as f:
         expectation_raw: str = f.read()
         expectation: ndarray = preprocess_puzzle(expectation_raw)
-    # Compare
+    # Compare against expectation
     assert_check: ndarray = (expectation == result)
     assert_msg: str = f"Test {num_test}) Expectation ({expectation}) != output ({result})!"
     assert assert_check.all(), assert_msg
 
 
 def test_take_2_steps() -> None:
-    # Load data
-    with open(TEST_INPUT_PATH, 'r') as f:
-        data_raw: str = f.read()
-    # Preprocess inputs
-    data: ndarray
-    instructions: list[str]
-    data, instructions = preprocess_inputs(data_raw)
-    # Take step
-    num_test: int
-    result: ndarray
-    step: int
+    # Load data and solve puzzle
+    puzzle: SolvePuzzle = SolvePuzzle(TEST_INPUT_PATH)
     num_test: int = 2
-    for step in range(num_test):
-        instruction: str = instructions[step]
-        result = take_step(data.copy(), instruction) if step == 0 else take_step(result.copy(), instruction)
-    # Compare against expectation
-    # Load
+    puzzle.take_steps(num_test)
+    result: ndarray = puzzle.puzzle
+    # Load expectation
     test_output_path: Path = INPUT_DIR_PATH / f'test_output_step_{num_test}.txt'
     with open(test_output_path, 'r') as f:
         expectation_raw: str = f.read()
         expectation: ndarray = preprocess_puzzle(expectation_raw)
-    # Compare
+    # Compare against expectation
     assert_check: ndarray = (expectation == result)
     assert_msg: str = f"Test {num_test}) Expectation ({expectation}) != output ({result})!"
     assert assert_check.all(), assert_msg
 
 
 def test_take_3_steps() -> None:
-    # Load data
-    with open(TEST_INPUT_PATH, 'r') as f:
-        data_raw: str = f.read()
-    # Preprocess inputs
-    data: ndarray
-    instructions: list[str]
-    data, instructions = preprocess_inputs(data_raw)
-    # Take step
-    num_test: int
-    result: ndarray
-    step: int
+    # Load data and solve puzzle
+    puzzle: SolvePuzzle = SolvePuzzle(TEST_INPUT_PATH)
     num_test: int = 3
-    for step in range(num_test):
-        instruction: str = instructions[step]
-        result = take_step(data.copy(), instruction) if step == 0 else take_step(result.copy(), instruction)
-    # Compare against expectation
-    # Load
+    puzzle.take_steps(num_test)
+    result: ndarray = puzzle.puzzle
+    # Load expectation
     test_output_path: Path = INPUT_DIR_PATH / f'test_output_step_{num_test}.txt'
     with open(test_output_path, 'r') as f:
         expectation_raw: str = f.read()
         expectation: ndarray = preprocess_puzzle(expectation_raw)
-    # Compare
+    # Compare against expectation
     assert_check: ndarray = (expectation == result)
     assert_msg: str = f"Test {num_test}) Expectation ({expectation}) != output ({result})!"
     assert assert_check.all(), assert_msg
 
 
 def test_take_4_steps() -> None:
-    # Load data
-    with open(TEST_INPUT_PATH, 'r') as f:
-        data_raw: str = f.read()
-    # Preprocess inputs
-    data: ndarray
-    instructions: list[str]
-    data, instructions = preprocess_inputs(data_raw)
-    # Take step
-    num_test: int
-    result: ndarray
-    step: int
-    num_test: int = 3
-    for step in range(num_test):
-        instruction: str = instructions[step]
-        result = take_step(data.copy(), instruction) if step == 0 else take_step(result.copy(), instruction)
-    # Compare against expectation
-    # Load
+    # Load data and solve puzzle
+    puzzle: SolvePuzzle = SolvePuzzle(TEST_INPUT_PATH)
+    num_test: int = 4
+    puzzle.take_steps(num_test)
+    result: ndarray = puzzle.puzzle
+    # Load expectation
     test_output_path: Path = INPUT_DIR_PATH / f'test_output_step_{num_test}.txt'
     with open(test_output_path, 'r') as f:
         expectation_raw: str = f.read()
         expectation: ndarray = preprocess_puzzle(expectation_raw)
-    # Compare
+    # Compare against expectation
     assert_check: ndarray = (expectation == result)
     assert_msg: str = f"Test {num_test}) Expectation ({expectation}) != output ({result})!"
     assert assert_check.all(), assert_msg
