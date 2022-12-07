@@ -92,7 +92,7 @@ def read_the_top(data: ndarray) -> str:
     return top_row
 
 
-def take_step(data: ndarray, instruction: str) -> ndarray:
+def take_step(data: ndarray, instruction: str, reverse_order: bool = True) -> ndarray:
     # Get parameters of data
     num_rows: int
     num_cols: int
@@ -141,7 +141,7 @@ def take_step(data: ndarray, instruction: str) -> ndarray:
         cell_index: slice = slice(cell_lhs_index, cell_rhs_index)
         cell_to_index: tuple[slice, int] = (cell_index, col_to)
 
-    cells = cells[::-1] if num_move > 1 else cells
+    cells = cells[::-1] if reverse_order else cells
     data[cell_to_index] = cells
     # Check for empty rows
     zero_row_check: Optional[ndarray, bool] = data.shape[1] == (zeros(data.shape[1], dtype=str) == data).sum(1)
@@ -189,15 +189,15 @@ class SolvePuzzle:
         self.puzzle, self.instructions = build_puzzle(self.input_path)
         self.instructions_remaining: list[str] = copy(self.instructions)
 
-    def solve(self, callback: bool = False) -> str:
+    def solve(self, callback: bool = False, reverse_order: bool = True) -> str:
         # Take all steps/instructions
         num_steps: int = len(self.instructions)
-        self.take_steps(num=num_steps, callback=callback)
+        self.take_steps(num=num_steps, callback=callback, reverse_order=reverse_order)
         # return the solution
         self.solution = read_the_top(self.puzzle)
         return self.solution
 
-    def take_steps(self, num: int, callback: bool = False) -> None:
+    def take_steps(self, num: int, callback: bool = False, reverse_order: bool = True) -> None:
         step: int
         instruction: str
         instructions: list[str] = self.instructions_remaining[:num]
@@ -210,7 +210,7 @@ class SolvePuzzle:
             step += 1
             if callback:
                 print(f'Step {step}: {instruction}', end='\n\n')
-            self.puzzle: ndarray = take_step(self.puzzle.copy(), instruction=instruction)
+            self.puzzle: ndarray = take_step(self.puzzle.copy(), instruction=instruction, reverse_order=reverse_order)
             if callback:
                 print(display_puzzle(self.puzzle), end='\n\n')
         # Cache instructions followed and remaining
